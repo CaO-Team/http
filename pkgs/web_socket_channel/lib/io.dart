@@ -13,6 +13,9 @@ import 'src/exception.dart';
 
 /// A [WebSocketChannel] that communicates using a `dart:io` [WebSocket].
 class IOWebSocketChannel extends AdapterWebSocketChannel {
+  WebSocket? _innerWebSocket;
+
+  WebSocket? get innerWebSocket => _innerWebSocket;
   /// Creates a new WebSocket connection.
   ///
   /// Connects to [url] using [WebSocket.connect] and returns a channel that can
@@ -59,5 +62,13 @@ class IOWebSocketChannel extends AdapterWebSocketChannel {
   IOWebSocketChannel(FutureOr<WebSocket> webSocket)
       : super(webSocket is Future<WebSocket>
             ? webSocket.then(IOWebSocket.fromWebSocket) as FutureOr<IOWebSocket>
-            : IOWebSocket.fromWebSocket(webSocket));
+            : IOWebSocket.fromWebSocket(webSocket)) {
+    if (webSocket is Future<WebSocket>) {
+      webSocket.then((ws) {
+        _innerWebSocket = ws;
+      });
+    } else {
+      _innerWebSocket = webSocket;
+    }
+  }
 }
